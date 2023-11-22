@@ -369,17 +369,18 @@ def sell_coins():
 
         LastPrice = float(last_price[coin]['price'])
         BuyPrice = float(coins_bought[coin]['bought_at'])
+        # Questo valore è espresso in percentuale.
         PriceChange = float((LastPrice - BuyPrice) / BuyPrice * 100)
         
-        # print(f'Ticker:{coin} Last: {LastPrice} - Buy: {BuyPrice} - Change: {PriceChange} ## TP:{TP} ## SL:{SL}')
+        if DEBUG: print(f'Ticker:{coin} Last: {LastPrice} - Buy: {BuyPrice} - Change: {PriceChange}% ## TP:{TP} ## SL:{SL}')
         # check that the price is above the take profit and readjust SL and TP accordingly if trialing stop loss used
         if LastPrice > TP and USE_TRAILING_STOP_LOSS:
 
             # increasing TP by TRAILING_TAKE_PROFIT (essentially next time to readjust SL)
             last_take_profit = coins_bought[coin]['take_profit']
             last_stop_loss = coins_bought[coin]['stop_loss']
-            TP = coins_bought[coin]['take_profit'] = PriceChange + TRAILING_TAKE_PROFIT
-            SL = coins_bought[coin]['stop_loss'] = coins_bought[coin]['take_profit'] - TRAILING_STOP_LOSS
+            coins_bought[coin]['take_profit'] = PriceChange + TRAILING_TAKE_PROFIT
+            coins_bought[coin]['stop_loss'] = coins_bought[coin]['take_profit'] - TRAILING_STOP_LOSS
             #if DEBUG: print(f"{coin} TP reached, adjusting TP {coins_bought[coin]['take_profit']:.2f}  and SL {coins_bought[coin]['stop_loss']:.2f} accordingly to lock-in profit")
             print(f"{coin} TP reached, adjusting TP {last_take_profit} >> {coins_bought[coin]['take_profit']:.2f}  and SL {last_stop_loss} >> {coins_bought[coin]['stop_loss']:.2f} accordingly to lock-in profit")
             continue
