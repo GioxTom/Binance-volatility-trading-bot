@@ -2,7 +2,7 @@
 script_options:
   # Switch between testnet and mainnet
   # Setting this to False will use REAL funds, use at your own risk
-  TEST_MODE: True
+  TEST_MODE: False
   LOG_TRADES: True
   LOG_FILE: 'trades.txt'
 
@@ -40,13 +40,13 @@ trading_options:
 
   # Number of times to check for TP/SL during each TIME_DIFFERENCE (minimum: 1).
   # Don't spam the Binance API, you will be banned (max 1200 requests per minute per IP).
-  RECHECK_INTERVAL: 10
+  RECHECK_INTERVAL: 60
 
   # the difference in % between the first and second checks for the price.
   CHANGE_IN_PRICE: 10
 
   # define in % when to sell a coin that's not making a profit.
-  STOP_LOSS: 5
+  STOP_LOSS: 3
 
   # define in % when to take profit on a profitable coin.
   TAKE_PROFIT: .8
@@ -55,7 +55,7 @@ trading_options:
   CUSTOM_LIST: True
    
   # Name of custom tickers list
-  TICKERS_LIST: 'tickers.txt'
+  TICKERS_LIST: 'tickers-full.txt'
    
   # whether to use trailing stop loss or not; default is True
   USE_TRAILING_STOP_LOSS: True
