@@ -102,7 +102,7 @@ def get_price(add_to_historical=True):
     prices = client.get_all_tickers()
 
     for coin in prices:
-
+        
         if CUSTOM_LIST:
             if any(item + PAIR_WITH == coin['symbol'] for item in tickers) and all(item not in coin['symbol'] for item in FIATS):
                 initial_price[coin['symbol']] = { 'price': coin['price'], 'time': datetime.now()}
@@ -137,10 +137,9 @@ def wait_for_price():
     pause_bot()
 
     if historical_prices[hsp_head]['BNB' + PAIR_WITH]['time'] > datetime.now() - timedelta(minutes=float(TIME_DIFFERENCE / RECHECK_INTERVAL)):
-
         # sleep for exactly the amount of time required
         time.sleep((timedelta(minutes=float(TIME_DIFFERENCE / RECHECK_INTERVAL)) - (datetime.now() - historical_prices[hsp_head]['BNB' + PAIR_WITH]['time'])).total_seconds())
-
+    
     print(f'Working...Session profit:{session_profit:.2f}% Est:${(QUANTITY * session_profit)/100:.2f}')
 
     # retreive latest prices
@@ -148,13 +147,15 @@ def wait_for_price():
 
     # calculate the difference in prices
     for coin in historical_prices[hsp_head]:
+        
 
         # minimum and maximum prices over time period
         min_price = min(historical_prices, key = lambda x: float("inf") if x is None else float(x[coin]['price']))
         max_price = max(historical_prices, key = lambda x: -1 if x is None else float(x[coin]['price']))
 
         threshold_check = (-1.0 if min_price[coin]['time'] > max_price[coin]['time'] else 1.0) * (float(max_price[coin]['price']) - float(min_price[coin]['price'])) / float(min_price[coin]['price']) * 100
-
+        #if threshold_check > 0:
+        #    print(f"coin:{coin} Min:{min_price[coin]['price']} Max:{max_price[coin]['price']} Threshold:{threshold_check} Change:{CHANGE_IN_PRICE}")
         # each coin with higher gains than our CHANGE_IN_PRICE is added to the volatile_coins dict if less than MAX_COINS is not reached.
         if threshold_check > CHANGE_IN_PRICE:
             coins_up +=1
@@ -359,7 +360,7 @@ def sell_coins():
     last_price = get_price(False) # don't populate rolling window
     #last_price = get_price(add_to_historical=True) # don't populate rolling window
     coins_sold = {}
-
+    
     for coin in list(coins_bought):
         # define stop loss and take profit
         TP = float(coins_bought[coin]['bought_at']) + (float(coins_bought[coin]['bought_at']) * coins_bought[coin]['take_profit']) / 100
@@ -369,18 +370,27 @@ def sell_coins():
         LastPrice = float(last_price[coin]['price'])
         BuyPrice = float(coins_bought[coin]['bought_at'])
         PriceChange = float((LastPrice - BuyPrice) / BuyPrice * 100)
-
+        
+        # print(f'Ticker:{coin} Last: {LastPrice} - Buy: {BuyPrice} - Change: {PriceChange} ## TP:{TP} ## SL:{SL}')
         # check that the price is above the take profit and readjust SL and TP accordingly if trialing stop loss used
         if LastPrice > TP and USE_TRAILING_STOP_LOSS:
 
             # increasing TP by TRAILING_TAKE_PROFIT (essentially next time to readjust SL)
+            last_take_profit = coins_bought[coin]['take_profit']
+            last_stop_loss = coins_bought[coin]['stop_loss']
             coins_bought[coin]['take_profit'] = PriceChange + TRAILING_TAKE_PROFIT
             coins_bought[coin]['stop_loss'] = coins_bought[coin]['take_profit'] - TRAILING_STOP_LOSS
-            if DEBUG: print(f"{coin} TP reached, adjusting TP {coins_bought[coin]['take_profit']:.2f}  and SL {coins_bought[coin]['stop_loss']:.2f} accordingly to lock-in profit")
+            #if DEBUG: print(f"{coin} TP reached, adjusting TP {coins_bought[coin]['take_profit']:.2f}  and SL {coins_bought[coin]['stop_loss']:.2f} accordingly to lock-in profit")
+            print(f"{coin} TP reached, adjusting TP {last_take_profit} >> {coins_bought[coin]['take_profit']:.2f}  and SL {last_stop_loss} >> {coins_bought[coin]['stop_loss']:.2f} accordingly to lock-in profit")
             continue
 
         # check that the price is below the stop loss or above take profit (if trailing stop loss not used) and sell if this is the case
         if LastPrice < SL or LastPrice > TP and not USE_TRAILING_STOP_LOSS:
+            if LastPrice < SL:
+                print(f'Stop Loss triggered Last:{LastPrice} - SL: {SL}')
+            if LastPrice > TP:
+                print(f'Take Profit triggered Last:{LastPrice} - TP: {TP}')    
+
             print(f"{txcolors.SELL_PROFIT if PriceChange >= 0. else txcolors.SELL_LOSS}TP or SL reached, selling {coins_bought[coin]['volume']} {coin} - {BuyPrice} - {LastPrice} : {PriceChange-(TRADING_FEE*2):.2f}% Est:${(QUANTITY*(PriceChange-(TRADING_FEE*2)))/100:.2f}{txcolors.DEFAULT}")
 
             # try to create a real order
