@@ -378,8 +378,8 @@ def sell_coins():
             # increasing TP by TRAILING_TAKE_PROFIT (essentially next time to readjust SL)
             last_take_profit = coins_bought[coin]['take_profit']
             last_stop_loss = coins_bought[coin]['stop_loss']
-            coins_bought[coin]['take_profit'] = PriceChange + TRAILING_TAKE_PROFIT
-            coins_bought[coin]['stop_loss'] = coins_bought[coin]['take_profit'] - TRAILING_STOP_LOSS
+            TP = coins_bought[coin]['take_profit'] = PriceChange + TRAILING_TAKE_PROFIT
+            SL = coins_bought[coin]['stop_loss'] = coins_bought[coin]['take_profit'] - TRAILING_STOP_LOSS
             #if DEBUG: print(f"{coin} TP reached, adjusting TP {coins_bought[coin]['take_profit']:.2f}  and SL {coins_bought[coin]['stop_loss']:.2f} accordingly to lock-in profit")
             print(f"{coin} TP reached, adjusting TP {last_take_profit} >> {coins_bought[coin]['take_profit']:.2f}  and SL {last_stop_loss} >> {coins_bought[coin]['stop_loss']:.2f} accordingly to lock-in profit")
             continue
